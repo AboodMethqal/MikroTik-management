@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Router {
+  id          String   @id @default(cuid())
+  name        String
+  host        String
+  port        Int      @default(8728)
+  username    String
+  password    String
+  hotspotName String?
+  dnsName     String?
+  currency    String   @default("USD")
+  autoReload  Int      @default(10)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sales       Sale[]
+  distributionPoints DistributionPoint[]
+
+  @@map("routers")
+}
+
+
+model DistributionPoint {
+  id            String   @id @default(cuid())
+  routerId      String
+  name          String
+  interfaceName String
+  description   String?
+  capacityMbps  Int?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  router        Router   @relation(fields: [routerId], references: [id], onDelete: Cascade)
+
+  @@unique([routerId, interfaceName])
+  @@index([routerId, active])
+  @@map("distribution_points")
+}
+
+model SystemNotification {
+  id         String   @id @default(cuid())
+  severity   NotificationSeverity @default(INFO)
+  title      String
+  message    String
+  resource   String?
+  resourceId String?
+  readAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([severity, createdAt])
+  @@index([readAt, createdAt])
+  @@map("system_notifications")
+}
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model AdminConfig {
+  id       Int    @id @default(autoincrement())
+  username String
+  password String
+
+  @@map("admin_config")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         AdminRole @default(ADMIN)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastLoginAt  DateTime?
+
+  @@index([active])
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  NETWORK_ADMIN
+  SALES_MANAGER
+  CASHIER
+  VIEWER
+}
+
+model PointOfSale {
+  id             String        @id @default(cuid())
+  name           String
+  phone          String?
+  address        String?
+  openingBalance Decimal       @default(0)
+  creditLimit    Decimal       @default(0)
+  active         Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  sales          Sale[]
+  payments       Payment[]
+  ledger         LedgerEntry[]
+
+  @@index([active])
+  @@map("point_of_sales")
+}
+
+model Sale {
+  id            String      @id @default(cuid())
+  pointOfSaleId String
+  routerId      String?
+  reference     String      @unique
+  note          String?
+  total         Decimal     @default(0)
+  status        SaleStatus  @default(COMPLETED)
+  createdAt     DateTime    @default(now())
+  createdBy     String?
+  pointOfSale   PointOfSale @relation(fields: [pointOfSaleId], references: [id], onDelete: Restrict)
+  router        Router?     @relation(fields: [routerId], references: [id], onDelete: SetNull)
+  items         SaleItem[]
+  ledger        LedgerEntry?
+
+  @@index([pointOfSaleId, createdAt])
+  @@index([routerId, createdAt])
+  @@index([status, createdAt])
+  @@map("sales")
+}
+
+enum SaleStatus {
+  COMPLETED
+  VOIDED
+  REFUNDED
+}
+
+model SaleItem {
+  id        String   @id @default(cuid())
+  saleId    String
+  cardType  String
+  username  String?
+  profile   String?
+  quantity  Int      @default(1)
+  unitPrice Decimal  @default(0)
+  total     Decimal  @default(0)
+  sale      Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([saleId])
+  @@map("sale_items")
+}
+
+model Payment {
+  id            String      @id @default(cuid())
+  pointOfSaleId String
+  amount        Decimal
+  note          String?
+  createdAt     DateTime    @default(now())
+  createdBy     String?
+  pointOfSale   PointOfSale @relation(fields: [pointOfSaleId], references: [id], onDelete: Restrict)
+  ledger        LedgerEntry?
+
+  @@index([pointOfSaleId, createdAt])
+  @@map("payments")
+}
+
+model LedgerEntry {
+  id            String      @id @default(cuid())
+  pointOfSaleId String
+  saleId        String?     @unique
+  paymentId     String?     @unique
+  type          LedgerEntryType
+  debit         Decimal     @default(0)
+  credit        Decimal     @default(0)
+  reference     String
+  description   String?
+  createdAt     DateTime    @default(now())
+  createdBy     String?
+  pointOfSale   PointOfSale @relation(fields: [pointOfSaleId], references: [id], onDelete: Restrict)
+  sale          Sale?       @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  payment       Payment?    @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([pointOfSaleId, createdAt])
+  @@index([type, createdAt])
+  @@map("ledger_entries")
+}
+
+enum LedgerEntryType {
+  OPENING_BALANCE
+  SALE
+  PAYMENT
+  ADJUSTMENT
+  REFUND
+}
+
+model CardTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  html        String
+  css         String?
+  paper       String   @default("A4")
+  columns     Int      @default(3)
+  rows        Int      @default(8)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active])
+  @@map("card_templates")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorName  String?
+  action     String
+  resource   String
+  resourceId String?
+  ipAddress  String?
+  userAgent  String?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  @@index([resource, resourceId])
+  @@index([actorId, createdAt])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
