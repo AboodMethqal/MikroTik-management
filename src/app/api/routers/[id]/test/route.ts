@@ -36,6 +36,23 @@ export async function POST(
     );
   }
 
+  if (router.isMock) {
+    // A virtual router has no TCP endpoint: report its simulated status instead
+    // of pretending a real ping happened.
+    const { getMockStatus } = await import("@/lib/mock-router");
+    const status = await getMockStatus();
+    return NextResponse.json(
+      {
+        success: status === "CONNECTED",
+        message: status === "CONNECTED" ? "Mock router ready" : `Mock router is ${status}`,
+        host: router.host,
+        port: router.port,
+        isMock: true,
+      },
+      { headers: rateLimit.headers },
+    );
+  }
+
   const host = router.host.split(":")[0];
   const port = parseInt(router.host.split(":")[1]) || router.port || 8728;
 

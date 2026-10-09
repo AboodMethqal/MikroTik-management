@@ -25,7 +25,72 @@ interface RouterOSConfig {
   timeout?: number;
 }
 
-class RouterOSClient {
+/**
+ * The contract every router backend must satisfy. `RouterOSClient` (real
+ * RouterOS over the API) and `MockRouterOSClient` (virtual demo router) both
+ * implement it, so routes and pages are unaware of which one they are talking
+ * to.
+ */
+export interface MikrotikClient {
+  connect(config?: RouterOSConfig): Promise<boolean>;
+  disconnect(): Promise<void>;
+  isConnected(): boolean;
+  write<T = Record<string, unknown>>(command: string, params?: string[]): Promise<T[]>;
+  getSystemIdentity(): Promise<SystemIdentity>;
+  getSystemResource(): Promise<SystemResource>;
+  reboot(): Promise<void>;
+  shutdown(): Promise<void>;
+  getHotspotUsers(filters?: string[]): Promise<HotspotUser[]>;
+  addHotspotUser(user: Partial<HotspotUser>): Promise<{ ret: string }[]>;
+  updateHotspotUser(id: string, user: Partial<HotspotUser>): Promise<void>;
+  removeHotspotUser(id: string): Promise<void>;
+  enableHotspotUser(id: string): Promise<void>;
+  disableHotspotUser(id: string): Promise<void>;
+  resetHotspotUser(id: string): Promise<void>;
+  getHotspotUserProfiles(): Promise<HotspotUserProfile[]>;
+  addHotspotUserProfile(profile: Partial<HotspotUserProfile>): Promise<{ ret: string }[]>;
+  updateHotspotUserProfile(id: string, profile: Partial<HotspotUserProfile>): Promise<void>;
+  removeHotspotUserProfile(id: string): Promise<void>;
+  getHotspotActive(server?: string): Promise<HotspotActive[]>;
+  removeHotspotActive(id: string): Promise<void>;
+  getHotspotHosts(): Promise<HotspotHost[]>;
+  removeHotspotHost(id: string): Promise<void>;
+  getHotspotCookies(): Promise<HotspotCookie[]>;
+  removeHotspotCookie(id: string): Promise<void>;
+  getHotspotIpBindings(): Promise<HotspotIpBinding[]>;
+  addHotspotIpBinding(binding: Partial<HotspotIpBinding>): Promise<{ ret: string }[]>;
+  removeHotspotIpBinding(id: string): Promise<void>;
+  enableHotspotIpBinding(id: string): Promise<void>;
+  disableHotspotIpBinding(id: string): Promise<void>;
+  getHotspotServers(): Promise<HotspotServer[]>;
+  getPppSecrets(): Promise<PppSecret[]>;
+  addPppSecret(secret: Partial<PppSecret>): Promise<{ ret: string }[]>;
+  updatePppSecret(id: string, secret: Partial<PppSecret>): Promise<void>;
+  removePppSecret(id: string): Promise<void>;
+  enablePppSecret(id: string): Promise<void>;
+  disablePppSecret(id: string): Promise<void>;
+  getPppProfiles(): Promise<PppProfile[]>;
+  addPppProfile(profile: Partial<PppProfile>): Promise<{ ret: string }[]>;
+  removePppProfile(id: string): Promise<void>;
+  getPppActive(): Promise<PppActive[]>;
+  removePppActive(id: string): Promise<void>;
+  getDhcpLeases(): Promise<DhcpLease[]>;
+  getInterfaceTraffic(interfaceName: string): Promise<InterfaceTraffic>;
+  getInterfaces(): Promise<Record<string, string>[]>;
+  getInterfaceMonitorTraffic(interfaceName: string): Promise<Record<string, string>>;
+  getWirelessClients(): Promise<Record<string, string>[]>;
+  getUserManagerUsers(): Promise<Record<string, string>[]>;
+  addUserManagerUser(user: Record<string, string>): Promise<{ ret: string }[]>;
+  updateUserManagerUser(id: string, user: Record<string, string>): Promise<void>;
+  removeUserManagerUser(id: string): Promise<void>;
+  enableUserManagerUser(id: string): Promise<void>;
+  disableUserManagerUser(id: string): Promise<void>;
+  getUserManagerProfiles(): Promise<Record<string, string>[]>;
+  renewUserManagerUser(id: string, profile: string, customer?: string): Promise<void>;
+  getLog(limit?: number): Promise<{ time: string; topics: string; message: string }[]>;
+}
+
+export class RouterOSClient implements MikrotikClient {
   private api: RouterOSAPI | null = null;
   private config: RouterOSConfig | null = null;
   private initialConfig: RouterOSConfig | null = null;

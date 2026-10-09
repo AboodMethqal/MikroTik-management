@@ -97,6 +97,7 @@ export async function POST(request: Request) {
       dnsName: validatedData.dnsName || "",
       currency: validatedData.currency,
       autoReload: validatedData.autoReload,
+      isMock: false,
     });
 
     // Don't expose password in response

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getRouter } from "@/lib/router-config";
-import { createRouterOSClient } from "@/lib/routeros";
+import { createRouterClient } from "@/lib/router-factory";
 import { setRouterSession } from "@/lib/session";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -47,11 +47,27 @@ export async function POST(
       );
     }
 
-    const client = createRouterOSClient({
+    if (router.isMock) {
+      // Mock routers require the explicit development flag.
+      const { isMockRouterEnabled } = await import("@/lib/mock-router");
+      if (!isMockRouterEnabled()) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Mock router is disabled. Set MOCK_ROUTER_ENABLED=true to use the demo router.",
+          },
+          { status: 400, headers: rateLimit.headers },
+        );
+      }
+    }
+
+    const client = createRouterClient({
       host: router.host,
       port: router.port,
       user: router.username,
       password: router.password,
+      mock: router.isMock,
     });
 
     const connected = await client.connect();
@@ -61,11 +77,14 @@ export async function POST(
         host: router.host,
         port: router.port,
         user: router.username,
+        isMock: router.isMock,
       });
       return NextResponse.json(
         {
           success: false,
-          error: `Gagal konek ke MikroTik ${router.host}:${router.port}. Cek IP, user, password dan pastikan port API (${router.port}) aktif.`,
+          error: router.isMock
+            ? `Mock router ${router.name} is not connected. Check the mock router status (DISCONNECTED/UNREACHABLE).`
+            : `Gagal konek ke MikroTik ${router.host}:${router.port}. Cek IP, user, password dan pastikan port API (${router.port}) aktif.`,
         },
         { status: 400, headers: rateLimit.headers },
       );
@@ -83,6 +102,7 @@ export async function POST(
       password: router.password,
       hotspotName: router.hotspotName,
       currency: router.currency,
+      isMock: router.isMock,
     });
 
     return NextResponse.json(

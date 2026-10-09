@@ -51,6 +51,7 @@ function mapRouterFromDB(row: {
   dnsName: string | null;
   currency: string;
   autoReload: number;
+  isMock: boolean;
   createdAt: Date;
   updatedAt: Date;
 }): MikrotikRouter {
@@ -65,6 +66,7 @@ function mapRouterFromDB(row: {
     dnsName: row.dnsName || "",
     currency: row.currency,
     autoReload: row.autoReload,
+    isMock: row.isMock === true,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -73,6 +75,7 @@ function mapRouterFromDB(row: {
 function mapRouterFromFile(router: MikrotikRouter): MikrotikRouter {
   return {
     ...router,
+    isMock: router.isMock === true,
     password: decryptPassword(router.password), // Decrypt when reading
   };
 }
@@ -162,6 +165,7 @@ export async function addRouter(
         dnsName: router.dnsName,
         currency: router.currency,
         autoReload: router.autoReload,
+        isMock: router.isMock === true,
       },
     });
     return mapRouterFromDB(created);
@@ -198,6 +202,7 @@ export async function updateRouter(
         dnsName: updates.dnsName,
         currency: updates.currency,
         autoReload: updates.autoReload,
+        isMock: updates.isMock,
       };
 
       const updated = await prisma.router.update({

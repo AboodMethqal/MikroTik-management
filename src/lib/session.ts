@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { encryptSessionData, decryptSessionData } from "./crypto";
-import { createRouterOSClient } from "./routeros";
+import { createRouterClient } from "./router-factory";
 import type { RouterOSConfig } from "./routeros";
 
 const SESSION_COOKIE_NAME = "mikhmon_session";
@@ -15,6 +15,8 @@ export interface RouterSessionData {
   password: string;
   hotspotName?: string;
   currency?: string;
+  /** True when the active router is the built-in virtual demo router. */
+  isMock?: boolean;
 }
 
 /**
@@ -82,16 +84,16 @@ export async function getAuthenticatedClient() {
       password: session.password,
     };
 
-    const client = createRouterOSClient(config);
+    const client = createRouterClient({ ...config, mock: session.isMock === true });
     const connected = await client.connect();
 
     if (!connected) {
-      return { client: null, error: "Failed to connect to MikroTik" };
+      return { client: null, error: session.isMock ? "Mock router is not connected (check mock status)" : "Failed to connect to MikroTik" };
     }
 
     return { client, error: null, session };
   } catch (error) {
     console.error("RouterOS connection error:", error);
-    return { client: null, error: "Connection error" };
+    return { client: null, error: error instanceof Error ? error.message : "Connection error" };
   }
 }

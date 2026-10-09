@@ -20,6 +20,8 @@ model Router {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  isMock      Boolean  @default(false)
+
   sales       Sale[]
   distributionPoints DistributionPoint[]
 
@@ -232,4 +234,15 @@ model AuditLog {
   @@index([actorId, createdAt])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model MockRouterState {
+  id        String   @id @default("default")
+  status    String   @default("CONNECTED")
+  data      String
+  seedVersion Int    @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("mock_router_state")
 }

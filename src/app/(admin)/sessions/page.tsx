@@ -13,6 +13,7 @@ import {
   User,
   Eye,
   EyeOff,
+  FlaskConical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +46,84 @@ export default function SessionsPage() {
     password: "",
   });
   const [savingAdmin, setSavingAdmin] = useState(false);
+  const [creatingMock, setCreatingMock] = useState(false);
+  const [mockError, setMockError] = useState<string | null>(null);
+  const [mockInfo, setMockInfo] = useState<{
+    status: string;
+    identity: string;
+    model: string;
+    version: string;
+    counts: Record<string, number>;
+  } | null>(null);
+
+  async function loadMockInfo() {
+    try {
+      const res = await fetch("/api/mock-router");
+      const data = await res.json();
+      if (data.success) {
+        setMockInfo(data.data);
+        setMockError(null);
+      } else {
+        setMockInfo(null);
+      }
+    } catch {
+      setMockInfo(null);
+    }
+  }
+
+  async function handleMockStatus(status: string) {
+    const res = await fetch("/api/mock-router", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "status", status }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      toast.success(`Mock router status: ${status}`);
+      loadMockInfo();
+    } else {
+      toast.error(data.error || "Failed to change mock status");
+    }
+  }
+
+  async function handleResetMock() {
+    if (!confirm("Reset mock router data to the original seed?")) return;
+    const res = await fetch("/api/mock-router", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reset" }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      toast.success("Mock router data reset");
+      loadMockInfo();
+    } else {
+      toast.error(data.error || "Failed to reset mock router");
+    }
+  }
+
+  async function handleCreateMockRouter() {
+    setCreatingMock(true);
+    setMockError(null);
+    try {
+      const res = await fetch("/api/routers/mock", { method: "POST" });
+      const result = await res.json();
+      if (result.success) {
+        toast.success(
+          result.created
+            ? "Demo MikroTik Router (MOCK) dibuat"
+            : "Demo MikroTik Router (MOCK) جاهز — البيانات أُعيدت",
+        );
+        fetchRouters();
+      } else {
+        setMockError(result.error || "Gagal membuat router mock");
+      }
+    } catch {
+      setMockError("Gagal membuat router mock");
+    } finally {
+      setCreatingMock(false);
+    }
+  }
 
   async function fetchRouters() {
     try {
@@ -62,6 +141,7 @@ export default function SessionsPage() {
 
   useEffect(() => {
     fetchRouters();
+    loadMockInfo();
     setAdminForm({
       username: "admin",
       password: "",
@@ -216,10 +296,29 @@ export default function SessionsPage() {
         {/* Router List */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Server className="h-4 w-4" />
-              Router List
-            </CardTitle>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Server className="h-4 w-4" />
+                Router List
+              </CardTitle>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-9 border-dashed"
+                onClick={handleCreateMockRouter}
+                disabled={creatingMock}
+              >
+                {creatingMock ? (
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                ) : (
+                  <FlaskConical className="mr-1 h-3 w-3" />
+                )}
+                Demo MikroTik (MOCK)
+              </Button>
+            </div>
+            {mockError && (
+              <p className="mt-2 text-xs text-destructive">{mockError}</p>
+            )}
           </CardHeader>
           <CardContent className="space-y-2">
             {routers.length === 0 ? (
@@ -240,10 +339,20 @@ export default function SessionsPage() {
                       <Server className="h-5 w-5 text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {r.hotspotName || r.name}
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-sm font-medium">
+                          {r.hotspotName || r.name}
+                        </p>
+                        {r.isMock && (
+                          <span className="shrink-0 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                            MOCK / DEMO
+                          </span>
+                        )}
+                      </div>
+                      <p className="truncate text-xs">
+                        {r.name}
+                        {r.isMock ? ` • virtual (${r.host})` : ""}
                       </p>
-                      <p className="truncate text-xs">{r.name}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 pl-13 sm:pl-0">
@@ -349,6 +458,87 @@ export default function SessionsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {mockInfo && (
+        <Card className="border-amber-500/40">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <FlaskConical className="h-4 w-4 text-amber-600" />
+              Mock Router Control (dev only)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-muted-foreground">الحالة:</span>
+              <span
+                className={`rounded px-2 py-0.5 text-xs font-bold ${
+                  mockInfo.status === "CONNECTED"
+                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                    : "bg-red-500/15 text-red-700 dark:text-red-300"
+                }`}
+              >
+                {mockInfo.status}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {mockInfo.identity} • {mockInfo.model} • {mockInfo.version}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4 lg:grid-cols-6">
+              {Object.entries(mockInfo.counts).map(([key, value]) => (
+                <div key={key} className="rounded-lg border p-2">
+                  <div className="text-muted-foreground">{key}</div>
+                  <div className="text-sm font-bold">{String(value)}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-9"
+                onClick={() => handleMockStatus("CONNECTED")}
+              >
+                Connect
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-9"
+                onClick={() => handleMockStatus("DISCONNECTED")}
+              >
+                Disconnect
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-9"
+                onClick={() => handleMockStatus("UNREACHABLE")}
+              >
+                Unreachable
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="h-9"
+                onClick={handleResetMock}
+              >
+                <Trash2 className="mr-1 h-3 w-3" />
+                Reset Mock Data
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-9"
+                onClick={loadMockInfo}
+              >
+                <RefreshCw className="h-3 w-3" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

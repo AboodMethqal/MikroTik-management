@@ -161,6 +161,77 @@ cp .env.example .env
 | `AUTH_SECRET` | **مطلوب** — 32 حرفًا على الأقل. يُستخدم لتشفير بيانات الراوترات وكوكيز الجلسات. توليد: `openssl rand -base64 48` |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | حساب التأسيس (bootstrap) — يُستخدم عند أول دخول فقط قبل إنشاء مستخدم قاعدة بيانات، ثم بدّله |
 | `AUTH_TRUST_HOST` | التطوير المحلي: `true` (بدونه يرفض Auth.js v5 كل طلبات `/api/auth/*` بخطأ `UntrustedHost`). الإنتاج: اضبط `AUTH_URL` على نطاقك العام |
+| `MOCK_ROUTER_ENABLED` | `true` لتفعيل **الراوتر الافتراضي (Mock)** للاختبار بدون عتاد. معطّل في الإنتاج |
+
+---
+
+## راوتر افتراضي للاختبار | Virtual Router for Testing
+
+يتيح المشروع تشغيل **راوتر MikroTik افتراضي** داخل التطبيق لاختبار كل الميزات **بدون عتاد حقيقي**.
+
+### التفعيل | Enabling
+
+```env
+# .env
+MOCK_ROUTER_ENABLED=true
+```
+
+- معطّل افتراضيًا. في الإنتاج اتركه `false` (أو احذفه).
+- لا يمكن إنشاء أو استخدام الراوتر الافتراضي إلا عند تفعيل هذا المتغير صراحةً.
+- **لا يوجد أي fallback**: فشل الاتصال براوتر حقيقي يبقى فشلًا حقيقيًا، ولا يُستبدل بالمحاكي أبدًا.
+
+### الاستخدام | Usage
+
+1. افتح **Admin Settings** (`/sessions`).
+2. اضغط **Demo MikroTik (MOCK)** ← يُنشأ راوتر باسم `Demo MikroTik Router` بعلامة `MOCK / DEMO`.
+3. اضغط **Open** ← تعمل كل الصفحات وكأن راوتر حقيقي متصل.
+4. من لوحة **Mock Router Control** يمكنك تبديل الحالة (CONNECTED / DISCONNECTED / UNREACHABLE) أو إعادة البيانات.
+
+### البنية | Architecture
+
+```
+Application pages / API routes
+        ↓
+RouterSession (encrypted cookie) → createRouterClient()   (src/lib/router-factory.ts)
+        ↓                                          ↓
+  isMock = false                          isMock = true
+        ↓                                          ↓
+ RouterOSClient (node-routeros)        MockRouterOSClient
+ (حقيقي — لم يتغيّر)                    (src/lib/mock-router.ts)
+```
+
+- كلا التنفيذيين ينفّذان الواجهة نفسها `MikrotikClient` المعرّفة في `src/lib/routeros.ts`، لذلك لا يوجد أي تكرار لمنطق التطبيق.
+- حالة المحاكي تُحفظ في جدول `mock_router_state` عبر Prisma فتنجو من إعادة تشغيل الخادم.
+
+### البيانات الأولية | Seed data (deterministic)
+
+| العنصر | العدد |
+|---|---|
+| Interfaces | 9 (ether1-5, wlan1-3, bridge) |
+| عملاء لاسلكيون | 27 |
+| مستخدمو Hotspot | 120 (نشط / مستخدم / معطل / منتهي) |
+| ملفات Hotspot | 6 |
+| جلسات نشطة | 18 |
+| Hosts / Cookies | 26 / 12 |
+| IP Bindings (منها محظورة) | 5 |
+| PPP (secrets / profiles / active) | 14 / 3 / 6 |
+| DHCP leases | 24 |
+| User Manager (users / profiles) | 30 / 4 |
+| سجلات بيع (RouterOS script) | 51 |
+
+حركة المرور (CPU / الذاكرة / RX / TX) تتغير تدريجيًا حسب الزمن الحقيقي بقيم واقعية.
+
+لإضافة بيانات التطبيق (نقاط البيع، المبيعات، الدفتر، قطع التوزيع، التقارير اليومية):
+
+```bash
+node scripts/seed-mock-data.cjs
+```
+
+### الملاحظات | Notes
+
+- **WebFig**: لا يُعرض WebFig مزيف. تظهر رسالة واضحة أن الميزة تتطلب راوتر MikroTik حقيقي، والتكامل الحقيقي لم يتغيّر.
+- **Shutdown / Reboot**: يعملان فعليًا (Shutdown يحوّل الحالة إلى `DISCONNECTED` كما في جهاز حقيقي) — استخدم لوحة التحكم للعودة إلى `CONNECTED`.
+- **لا يلمس الراوتر الافتراضي أي بيانات حقيقية**: هو سجل منفصل تمامًا (`isMock = true`).
 
 ---
 

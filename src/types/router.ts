@@ -11,6 +11,8 @@ export interface MikrotikRouter {
   autoReload: number;
   createdAt: string;
   updatedAt: string;
+  /** True only for the built-in virtual (mock) demo router. */
+  isMock: boolean;
 }
 
 export interface RouterConfig {
