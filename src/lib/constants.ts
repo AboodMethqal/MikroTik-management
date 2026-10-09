@@ -1,6 +1,6 @@
 // Application Constants
 
-export const APP_NAME = "مدير شبكات MikroTik";
+export const APP_NAME = "Mikhmon Next — مثقال تك";
 export const APP_VERSION = "1.0.0";
 
 // RouterOS API default settings

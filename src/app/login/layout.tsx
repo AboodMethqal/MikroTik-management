@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "Login - Mikhmon Next",
-  description: "Login to Mikhmon Next",
+  title: "تسجيل الدخول — Mikhmon Next • Methqal Tech",
+  description:
+    "Login to Mikhmon Next — Methqal Tech Edition, developed and maintained by Methqal Tech.",
 };
 
 export default async function LoginLayout({

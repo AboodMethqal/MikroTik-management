@@ -94,7 +94,7 @@ export function AppSidebar() {
           ) : <SidebarMenuItem key={item.href}><SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.title} className="h-9"><Link href={item.href!}><item.icon className="h-[17px] w-[17px]" /><span>{item.title}</span>{item.badge && <span className="mr-auto rounded bg-emerald-500/15 px-1.5 text-[9px] font-bold text-emerald-300">{item.badge}</span>}</Link></SidebarMenuButton></SidebarMenuItem>)}
         </SidebarMenu></SidebarGroupContent></SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border p-3"><div className="rounded-xl bg-white/5 p-3 text-[11px] text-slate-400 group-data-[collapsible=icon]:hidden"><div className="mb-1 flex items-center gap-2 text-slate-200"><div className="h-2 w-2 rounded-full bg-emerald-400" /> النظام يعمل</div><div>RouterOS • مراقبة لحظية</div></div><div className="px-1 text-[10px] text-slate-500 group-data-[collapsible=icon]:hidden">Mikhmon Next • Smart Creator Edition</div></SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border p-3"><div className="rounded-xl bg-white/5 p-3 text-[11px] text-slate-400 group-data-[collapsible=icon]:hidden"><div className="mb-1 flex items-center gap-2 text-slate-200"><div className="h-2 w-2 rounded-full bg-emerald-400" /> النظام يعمل</div><div>RouterOS • مراقبة لحظية</div></div><div className="px-1 text-[10px] text-slate-500 group-data-[collapsible=icon]:hidden">Mikhmon Next • Methqal Tech Edition</div></SidebarFooter>
     </Sidebar>
   );
 }

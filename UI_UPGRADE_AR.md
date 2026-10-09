@@ -1,4 +1,4 @@
-# ترقية الواجهة — Smart Creator Edition
+# ترقية الواجهة — Methqal Tech Edition
 
 ## ما تم تحسينه
 - إعادة تصميم لوحة التحكم بأسلوب Network Operations Center.

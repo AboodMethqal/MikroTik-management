@@ -1,4 +1,4 @@
-# Mikhmon Next — Smart Creator Production Upgrade
+# Mikhmon Next — Methqal Tech Production Upgrade
 
 هذه النسخة هي تطوير مباشر للمشروع المرفوع، وليست مشروعًا منفصلًا.
 

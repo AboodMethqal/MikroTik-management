@@ -1,7 +1,8 @@
 {
-  "name": "mikhmon-next",
+  "name": "mikhmon-next-methqal-tech-edition",
   "version": "1.0.0",
   "private": true,
+  "description": "Professional MikroTik network management, Hotspot, User Manager, card printing, POS, reporting and monitoring platform developed and maintained by Methqal Tech.",
   "scripts": {
     "dev": "next dev --webpack",
     "build": "prisma generate && next build",

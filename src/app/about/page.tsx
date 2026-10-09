@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Info, Sparkles } from "lucide-react";
+import { BadgeCheck, Info, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -45,6 +45,61 @@ export default function AboutPage() {
         </Button>
         <h1 className="text-xl font-semibold">About</h1>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BadgeCheck className="h-5 w-5" />
+            Mikhmon Next — Methqal Tech Edition
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <p>
+            Developed, customized, extended, and maintained by{" "}
+            <strong>Methqal Tech / مثقال تك</strong> — عبدالرحمن مثقال
+            (Abdulrahman Methqal).
+          </p>
+          <ul className="list-inside list-disc space-y-1">
+            <li>
+              Website:{" "}
+              <a
+                href="https://methqal-tech.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                methqal-tech.vercel.app
+              </a>
+            </li>
+            <li>
+              Email:{" "}
+              <a
+                href="mailto:aboodezmethqal7704@gmail.com"
+                className="text-primary hover:underline"
+              >
+                aboodezmethqal7704@gmail.com
+              </a>
+            </li>
+            <li>
+              Phone:{" "}
+              <a href="tel:+967770499151" className="text-primary hover:underline">
+                +967770499151
+              </a>
+            </li>
+            <li>
+              Repository:{" "}
+              <a
+                href="https://github.com/AboodMethqal/MikroTik-management"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                AboodMethqal/MikroTik-management
+              </a>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
