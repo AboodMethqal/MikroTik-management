@@ -105,12 +105,12 @@ export default function TrafficPage() {
       <div className="space-y-4">
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <Skeleton className="h-5 w-5 rounded" />
                 <Skeleton className="h-5 w-40" />
               </div>
-              <Skeleton className="h-9 w-64" />
+              <Skeleton className="h-9 w-full sm:w-64" />
             </div>
           </CardHeader>
           <CardContent>
@@ -125,12 +125,12 @@ export default function TrafficPage() {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <AreaChart className="h-5 w-5" />
-              <span>Interface: {selectedInterface || "Select Interface"}</span>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="flex min-w-0 items-center gap-2">
+              <AreaChart className="h-5 w-5 shrink-0" />
+              <span className="truncate">Interface: {selectedInterface || "Select Interface"}</span>
             </CardTitle>
-            <div className="w-64">
+            <div className="w-full sm:w-64">
               <Select
                 value={selectedInterface}
                 onValueChange={(value) => {
@@ -153,7 +153,7 @@ export default function TrafficPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-[500px] w-full">
+          <div className="h-[300px] w-full md:h-[500px]">
             {trafficData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsAreaChart

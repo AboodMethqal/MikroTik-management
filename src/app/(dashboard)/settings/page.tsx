@@ -220,8 +220,8 @@ function SettingsContent() {
                 }
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2 space-y-2">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="host">IP MikroTik</Label>
                 <Input
                   id="host"

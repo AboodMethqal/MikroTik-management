@@ -165,12 +165,12 @@ export default function TemplateEditorPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
               <span>Voucher Template Editor</span>
             </CardTitle>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={handlePreview}>
                 <Eye className="mr-2 h-4 w-4" />
                 Preview
@@ -187,7 +187,7 @@ export default function TemplateEditorPage() {
             <div className="space-y-2">
               <Label>Select Template</Label>
               <Select value={template} onValueChange={handleTemplateChange}>
-                <SelectTrigger className="w-64">
+                <SelectTrigger className="w-full sm:w-64">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -211,7 +211,7 @@ export default function TemplateEditorPage() {
 
             <div className="rounded-lg bg-muted p-4">
               <h3 className="mb-2 font-semibold">Available Variables (use double curly braces syntax):</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="grid gap-2 text-sm sm:grid-cols-2">
                 <div><code>{'{{logo}}'}</code> - Logo URL</div>
                 <div><code>{'{{hotspotname}}'}</code> - Hotspot name</div>
                 <div><code>{'{{username}}'}</code> - Username</div>

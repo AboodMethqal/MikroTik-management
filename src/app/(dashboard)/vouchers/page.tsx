@@ -134,7 +134,7 @@ export default function VouchersPage() {
                 className={`${COLORS[index % COLORS.length]} text-white border-0`}
               >
                 <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                     <div className="rounded-full bg-white/20 p-3">
                       <Ticket className="h-6 w-6" />
                     </div>

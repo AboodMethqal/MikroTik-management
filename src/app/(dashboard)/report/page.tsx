@@ -199,8 +199,8 @@ export default function ReportPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl font-bold md:text-2xl">
           Selling Report {monthFull[parseInt(monthIdx)]} {year}
         </h1>
         <div className="text-right">
@@ -229,7 +229,7 @@ export default function ReportPage() {
               Monthly
             </Button>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid gap-4 sm:grid-cols-3">
             {searchMode === "daily" && (
               <div className="space-y-2">
                 <Label>Day</Label>

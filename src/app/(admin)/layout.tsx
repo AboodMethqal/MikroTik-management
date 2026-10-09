@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { AdminSidebar, AdminTopBar } from "@/components/layout/admin-sidebar";
 import { Toaster } from "@/components/ui/sonner";
 
 export default async function AdminLayout({
@@ -15,10 +16,13 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
+    <SidebarProvider>
       <AdminSidebar />
-       <main className="flex-1 p-6">{children}</main>
+      <SidebarInset>
+        <AdminTopBar />
+        <main className="w-full min-w-0 flex-1 p-4 md:p-6">{children}</main>
+      </SidebarInset>
       <Toaster />
-    </div>
+    </SidebarProvider>
   );
 }

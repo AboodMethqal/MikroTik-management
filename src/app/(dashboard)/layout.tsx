@@ -28,7 +28,7 @@ export default async function DashboardLayout({
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex min-h-[calc(100vh-4rem)] flex-col overflow-y-auto bg-background px-3 py-4 md:px-6 md:py-6 lg:px-8">
+        <main className="flex min-h-[calc(100vh-4rem)] w-full min-w-0 flex-col overflow-y-auto bg-background px-3 py-4 md:px-6 md:py-6 lg:px-8">
           {children}
         </main>
       </SidebarInset>
