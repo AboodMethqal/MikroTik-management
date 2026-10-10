@@ -14,6 +14,8 @@ import type {
   PppActive,
   DhcpLease,
   InterfaceTraffic,
+  RouterAddress,
+  ArpEntry,
 } from "@/types/routeros";
 import { ROUTEROS_DEFAULT_PORT, ROUTEROS_TIMEOUT } from "./constants";
 
@@ -77,6 +79,8 @@ export interface MikrotikClient {
   getDhcpLeases(): Promise<DhcpLease[]>;
   getInterfaceTraffic(interfaceName: string): Promise<InterfaceTraffic>;
   getInterfaces(): Promise<Record<string, string>[]>;
+  getInterfaceAddresses(): Promise<RouterAddress[]>;
+  getArpEntries(): Promise<ArpEntry[]>;
   getInterfaceMonitorTraffic(interfaceName: string): Promise<Record<string, string>>;
   getWirelessClients(): Promise<Record<string, string>[]>;
   getUserManagerUsers(): Promise<Record<string, string>[]>;
@@ -378,6 +382,16 @@ export class RouterOSClient implements MikrotikClient {
   // DHCP Leases
   async getDhcpLeases(): Promise<DhcpLease[]> {
     return this.write<DhcpLease>("/ip/dhcp-server/lease/print");
+  }
+
+  // IP addresses assigned to interfaces (maps an interface to its subnet)
+  async getInterfaceAddresses(): Promise<RouterAddress[]> {
+    return this.write<RouterAddress>("/ip/address/print");
+  }
+
+  // ARP / neighbour table (clients reachable behind each interface)
+  async getArpEntries(): Promise<ArpEntry[]> {
+    return this.write<ArpEntry>("/ip/arp/print");
   }
 
   // Interface / Traffic

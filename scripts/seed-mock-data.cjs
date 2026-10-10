@@ -37,15 +37,20 @@ async function main() {
         { routerId: router.id, name: "DP-A — المبنى الرئيسي", interfaceName: "wlan1", description: "AP 5GHz - المبنى الرئيسي", capacityMbps: 200, active: true },
         { routerId: router.id, name: "DP-B — المبنى الخلفي", interfaceName: "wlan2", description: "AP 2.4GHz - المبنى الخلفي", capacityMbps: 100, active: true },
         { routerId: router.id, name: "DP-C — منطقة خارجية", interfaceName: "wlan3", description: "AP 5GHz - Outdoor", capacityMbps: 150, active: true },
+        { routerId: router.id, name: "DP-D — قطاع سلكي 1", interfaceName: "ether2", description: "عمود سلكي 10.20.1.0/24", capacityMbps: 300, active: true },
+        { routerId: router.id, name: "DP-E — قطاع سلكي 2", interfaceName: "ether3", description: "عمود سلكي 10.20.2.0/24", capacityMbps: 300, active: true },
       ],
     });
-    console.log("  + 3 distribution points");
+    console.log("  + 5 distribution points (3 wireless + 2 wired)");
   }
 
   // ---- Points of sale ----
+  // The ledger treats a positive opening balance as an outstanding amount the
+  // point of sale is already carrying, so creditLimit must stay well above it
+  // (otherwise every new sale is rejected by the credit-limit rule).
   const posDefs = [
-    { name: "نقطة البيع الرئيسية", phone: "+967770000001", address: "الشارع الرئيسي", openingBalance: 500000, creditLimit: 500000 },
-    { name: "نقطة بيع الفرع", phone: "+967770000002", address: "الفرع الثاني", openingBalance: 200000, creditLimit: 250000 },
+    { name: "نقطة البيع الرئيسية", phone: "+967770000001", address: "الشارع الرئيسي", openingBalance: 100000, creditLimit: 2000000 },
+    { name: "نقطة بيع الفرع", phone: "+967770000002", address: "الفرع الثاني", openingBalance: 50000, creditLimit: 1500000 },
   ];
   const poss = [];
   for (const def of posDefs) {

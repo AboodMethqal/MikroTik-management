@@ -6,7 +6,7 @@
  * reproducible. Nothing in this file touches a real router.
  */
 
-export const MOCK_SEED_VERSION = 2;
+export const MOCK_SEED_VERSION = 3;
 
 /** Small deterministic PRNG (mulberry32) so the dataset never changes randomly. */
 function mulberry32(seed: number) {
@@ -248,6 +248,25 @@ export interface MockLogEntry {
   message: string;
 }
 
+/** IP address configured on an interface (/ip/address/print). */
+export interface MockAddress {
+  ".id": string;
+  address: string;
+  network: string;
+  interface: string;
+  disabled: string;
+  dynamic: string;
+}
+
+/** ARP/neighbour entry (/ip/arp/print). */
+export interface MockArpEntry {
+  ".id": string;
+  address: string;
+  "mac-address": string;
+  interface: string;
+  status: string;
+}
+
 export interface MockRouterState {
   seedVersion: number;
   status: MockStatus;
@@ -283,6 +302,8 @@ export interface MockRouterState {
   userManagerProfiles: MockUserManagerProfile[];
   schedulers: MockScheduler[];
   scripts: MockScript[];
+  addresses: MockAddress[];
+  arp: MockArpEntry[];
   logs: MockLogEntry[];
   idSeq: number;
 }
@@ -592,6 +613,46 @@ export function createSeedState(now = Date.now()): MockRouterState {
     ][i % 6],
   }));
 
+  // Interface IP addresses: each distribution segment is a real subnet so
+  // client-per-interface attribution can be verified against wired ports too.
+  const addresses: MockAddress[] = [
+    { iface: "ether1", cidr: "203.0.113.10/30" },
+    { iface: "ether2", cidr: "10.20.1.1/24" },
+    { iface: "ether3", cidr: "10.20.2.1/24" },
+    { iface: "ether4", cidr: "192.168.88.1/24" },
+    { iface: "wlan1", cidr: "10.30.1.1/24" },
+    { iface: "wlan2", cidr: "10.30.2.1/24" },
+    { iface: "wlan3", cidr: "10.30.3.1/24" },
+    { iface: "bridge", cidr: "10.5.50.1/24" },
+  ].map((a) => ({
+    ".id": id(),
+    address: a.cidr,
+    network: a.cidr,
+    interface: a.iface,
+    disabled: "false",
+    dynamic: "false",
+  }));
+
+  // Neighbours behind the wired distribution ports and the hotspot bridge.
+  const arp: MockArpEntry[] = [];
+  const wiredSegments = [
+    { iface: "ether2", prefix: "10.20.1", count: 12 },
+    { iface: "ether3", prefix: "10.20.2", count: 8 },
+    { iface: "bridge", prefix: "10.5.50", count: 18 },
+    { iface: "ether4", prefix: "192.168.88", count: 6 },
+  ];
+  for (const seg of wiredSegments) {
+    for (let i = 0; i < seg.count; i++) {
+      arp.push({
+        ".id": id(),
+        address: `${seg.prefix}.${10 + i}`,
+        "mac-address": `CC:2D:E0:${pad(1 + (i % 60))}:${pad((i * 9) % 256)}:${pad((i * 17) % 256)}`,
+        interface: seg.iface,
+        status: i % 13 === 12 ? "stale" : "reachable",
+      });
+    }
+  }
+
   return {
     seedVersion: MOCK_SEED_VERSION,
     status: "CONNECTED",
@@ -627,6 +688,8 @@ export function createSeedState(now = Date.now()): MockRouterState {
     userManagerProfiles,
     schedulers,
     scripts,
+    addresses,
+    arp,
     logs,
     idSeq,
   };

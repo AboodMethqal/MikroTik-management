@@ -165,3 +165,23 @@ export interface InterfaceTraffic {
   "rx-packet": string;
   "tx-packet": string;
 }
+
+/** Entry from /ip/address/print — used to map an interface to its subnet. */
+export interface RouterAddress {
+  ".id": string;
+  address: string;
+  network: string;
+  interface: string;
+  disabled: string;
+  dynamic: string;
+}
+
+/** Entry from /ip/arp/print — a neighbour device behind an interface. */
+export interface ArpEntry {
+  ".id": string;
+  address: string;
+  "mac-address": string;
+  interface: string;
+  status: string;
+  hostname?: string;
+}

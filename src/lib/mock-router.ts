@@ -29,6 +29,8 @@ import type {
   PppActive,
   DhcpLease,
   InterfaceTraffic,
+  RouterAddress,
+  ArpEntry,
 } from "@/types/routeros";
 import type { MikrotikClient, RouterOSConfig } from "./routeros";
 import { ROUTEROS_DEFAULT_PORT, ROUTEROS_TIMEOUT } from "./constants";
@@ -406,6 +408,12 @@ export class MockRouterOSClient implements MikrotikClient {
         return finish(
           state.interfaces.filter((i) => matchesQuery(i as unknown as Record<string, unknown>, query)),
         );
+
+      case "/ip/address/print":
+        return finish(state.addresses.filter((a) => matchesQuery(a as unknown as Record<string, unknown>, query)));
+
+      case "/ip/arp/print":
+        return finish(state.arp.filter((a) => matchesQuery(a as unknown as Record<string, unknown>, query)));
 
       case "/interface/monitor-traffic": {
         const name = set.interface || query.interface;
@@ -961,6 +969,14 @@ export class MockRouterOSClient implements MikrotikClient {
 
   async getInterfaces(): Promise<Record<string, string>[]> {
     return this.write<Record<string, string>>("/interface/print");
+  }
+
+  async getInterfaceAddresses(): Promise<RouterAddress[]> {
+    return this.write<RouterAddress>("/ip/address/print");
+  }
+
+  async getArpEntries(): Promise<ArpEntry[]> {
+    return this.write<ArpEntry>("/ip/arp/print");
   }
 
   async getInterfaceMonitorTraffic(interfaceName: string): Promise<Record<string, string>> {
