@@ -33,7 +33,16 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  serverExternalPackages: ["node-routeros"],
+  // Native/database drivers must stay external so their platform bindings are
+  // loaded from node_modules at runtime instead of being bundled.
+  serverExternalPackages: [
+    "node-routeros",
+    "better-sqlite3",
+    "@libsql/client",
+    "@prisma/adapter-libsql",
+    "@prisma/adapter-better-sqlite3",
+    "@prisma/adapter-pg",
+  ],
 
   // Pin the workspace root to this project: a stray stub lockfile in the
   // parent folder otherwise makes Next infer the wrong root.
